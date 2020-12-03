@@ -1,3 +1,5 @@
+ZMF add function to adjust optical flow color by modifying the map color ring
+
 # OPTICAL FLOW TOOLKIT v0.1
 #### RUOTENG LI                                  
 #### 20 July 2016                                 

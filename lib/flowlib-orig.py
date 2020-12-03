@@ -39,19 +39,19 @@ Flow Section
 """
 
 
-def show_flow(filename,start_point,distribution):
+def show_flow(filename):
     """
     visualize optical flow map using matplotlib
     :param filename: optical flow file
     :return: None
     """
     flow = read_flow(filename)
-    img = flow_to_image(flow,start_point,distribution)
+    img = flow_to_image(flow)
     plt.imshow(img)
     plt.show()
 
 
-def visualize_flow(flow,start_point,distribution, mode='Y'):
+def visualize_flow(flow, mode='Y'):
     """
     this function visualize the input flow
     :param flow: input flow in array
@@ -60,7 +60,7 @@ def visualize_flow(flow,start_point,distribution, mode='Y'):
     """
     if mode == 'Y':
         # Ccbcr color wheel
-        img = flow_to_image(flow,start_point,distribution)
+        img = flow_to_image(flow)
         plt.imshow(img)
         plt.show()
     elif mode == 'RGB':
@@ -131,14 +131,14 @@ def write_flow(flow, filename):
     f.close()
 
 
-def save_flow_image(flow, image_file,start_point,distribution):
+def save_flow_image(flow, image_file):
     """
     save flow visualization into image file
     :param flow: optical flow data
     :param flow_fil
     :return: None
     """
-    flow_img = flow_to_image(flow,start_point,distribution)
+    flow_img = flow_to_image(flow)
     img_out = Image.fromarray(flow_img)
     img_out.save(image_file)
 
@@ -246,7 +246,7 @@ def flow_error(tu, tv, u, v):
     return mepe
 
 
-def flow_to_image(flow, start_point, distribution):
+def flow_to_image(flow):
     """
     Convert flow into middlebury color code image
     :param flow: optical flow map
@@ -276,7 +276,7 @@ def flow_to_image(flow, start_point, distribution):
     u = u/(maxrad + np.finfo(float).eps)
     v = v/(maxrad + np.finfo(float).eps)
 
-    img = compute_color(u, v, start_point, distribution)
+    img = compute_color(u, v)
 
     idx = np.repeat(idxUnknow[:, :, np.newaxis], 3, axis=2)
     img[idx] = 0
@@ -439,7 +439,7 @@ def scale_image(image, new_range):
     return scaled_image.astype(np.uint8)
 
 
-def compute_color(u, v, start_point, distribution):
+def compute_color(u, v):
     """
     compute optical flow color map
     :param u: optical flow horizontal map
@@ -452,7 +452,7 @@ def compute_color(u, v, start_point, distribution):
     u[nanIdx] = 0
     v[nanIdx] = 0
 
-    colorwheel = make_color_wheel(start_point,distribution)
+    colorwheel = make_color_wheel()
     ncols = np.size(colorwheel, 0)
 
     rad = np.sqrt(u**2+v**2)
@@ -483,18 +483,17 @@ def compute_color(u, v, start_point, distribution):
     return img
 
 
-def make_color_wheel(start_point=0.0, distribution=[15,6,4,11,13,6]):
+def make_color_wheel():
     """
     Generate color wheel according Middlebury color code
     :return: Color wheel
     """
-
-    RY = distribution[0]
-    YG = distribution[1]
-    GC = distribution[2]
-    CB = distribution[3]
-    BM = distribution[4]
-    MR = distribution[5]
+    RY = 15
+    YG = 6
+    GC = 4
+    CB = 11
+    BM = 13
+    MR = 6
 
     ncols = RY + YG + GC + CB + BM + MR
 
@@ -531,12 +530,7 @@ def make_color_wheel(start_point=0.0, distribution=[15,6,4,11,13,6]):
     colorwheel[col:col+MR, 2] = 255 - np.transpose(np.floor(255 * np.arange(0, MR) / MR))
     colorwheel[col:col+MR, 0] = 255
 
-    colorwheel_go = np.zeros([ncols, 3])
-    
-    togo = int(ncols*start_point)
-    colorwheel_go[:ncols-togo] = colorwheel[togo:]
-    colorwheel_go[ncols-togo:] = colorwheel[:togo] 
-    return colorwheel_go
+    return colorwheel
 
 
 def read_flo_file(filename):
@@ -555,7 +549,7 @@ def read_flo_file(filename):
         w = np.fromfile(f, np.int32, count=1)
         h = np.fromfile(f, np.int32, count=1)
         print("Reading %d x %d flow file in .flo format" % (h, w))
-        data2d = np.fromfile(f, np.float32, count=2 * 736 * 480)
+        data2d = np.fromfile(f, np.float32, count=2 * w * h)
         # reshape data into 3D array (columns, rows, channels)
         data2d = np.resize(data2d, (h[0], w[0], 2))
     f.close()
